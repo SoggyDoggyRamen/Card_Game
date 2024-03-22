@@ -2,6 +2,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.awt.Rectangle;
 
@@ -97,6 +98,55 @@ public class Card {
         return deck;
     }
 
+    public static boolean hasPossibleMoves(ArrayList<Card> hand) {
+        for (int currNum = 0; currNum < hand.size(); currNum ++) {
+            for(int num = 0; num < hand.size(); num ++) {
+                if (!(num == currNum)) {
+                    int sum = getIntValue(hand.get(currNum)) + getIntValue(hand.get(num));
+                    if (sum == 11) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+    //returns an int value, if the value is J, Q, or K return 0
+    public static int getIntValue(Card card){
+        if (card.getValue().equals("A")) {
+            return 1;
+        }
+        if (card.getValue().equals("02")) {
+            return 2;
+        }
+        if (card.getValue().equals("03")) {
+            return 3;
+        }
+        if (card.getValue().equals("04")) {
+            return 4;
+        }
+        if (card.getValue().equals("05")) {
+            return 5;
+        }
+        if (card.getValue().equals("06")) {
+            return 6;
+        }
+        if (card.getValue().equals("07")) {
+            return 7;
+        }
+        if (card.getValue().equals("08")) {
+            return 8;
+        }
+        if (card.getValue().equals("09")) {
+            return 9;
+        }
+        if (card.getValue().equals("10")) {
+            return 10;
+        }
+
+        return 0;
+    }
+
     public static Card getCard(ArrayList<Card> deck) {
         int randomNum = (int) (Math.random() * deck.size());
         return deck.remove(randomNum);
@@ -109,5 +159,42 @@ public class Card {
             hand.add(c);
         }
         return hand;
+    }
+
+    public static ArrayList<Integer> submit(ArrayList<Card> hand) {
+        int sum = 0;
+        ArrayList<Integer> index = new ArrayList<Integer>();
+        for (int i = 0; i < hand.size(); i ++) {
+            if (hand.get(i).getHighlight()) {
+                sum += getIntValue(hand.get(i));
+                index.add(i);
+            }
+        }
+        if (sum == 11 && index.size() == 2) {
+            return index;
+        }
+        if (sum == 0 && index.size() == 3) {
+            if (checkJQK(hand, index)) return index;
+        }
+        index.clear();
+        return index;
+    }
+
+    public static boolean checkJQK(ArrayList<Card> hand, ArrayList<Integer> index) {
+        boolean J = false;
+        boolean Q = false;
+        boolean K = false;
+        if (hand.get(index.get(0)).getValue().equals("J") && !J) J = true;
+        if (hand.get(index.get(0)).getValue().equals("Q") && !Q) Q = true;
+        if (hand.get(index.get(0)).getValue().equals("K") && !K) K = true;
+        if (hand.get(index.get(1)).getValue().equals("J") && !J) J = true;
+        if (hand.get(index.get(1)).getValue().equals("Q") && !Q) Q = true;
+        if (hand.get(index.get(1)).getValue().equals("K") && !K) K = true;
+        if (hand.get(index.get(2)).getValue().equals("J") && !J) J = true;
+        if (hand.get(index.get(2)).getValue().equals("Q") && !Q) Q = true;
+        if (hand.get(index.get(2)).getValue().equals("K") && !K) K = true;
+
+        if (J && Q && K) return true;
+        return false;
     }
 }

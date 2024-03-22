@@ -9,13 +9,17 @@ import java.awt.Font;
 
 class DrawPanel extends JPanel implements MouseListener {
 
+    private boolean running;
     private ArrayList<Card> hand;
     private ArrayList<Card> deck;
     private Rectangle button;
+    private Rectangle submitButton;
 
     public DrawPanel() {
         button = new Rectangle(147, 300, 160, 26);
+        submitButton = new Rectangle(180, 380, 90, 26);
         deck = Card.buildDeck();
+        running = true;
         this.addMouseListener(this);
         hand = Card.buildHand(deck);
     }
@@ -41,6 +45,8 @@ class DrawPanel extends JPanel implements MouseListener {
         }
         g.setFont(new Font("Courier New", Font.BOLD, 20));
         g.drawString("GET NEW CARDS", 150, 320);
+        g.drawString("SUBMIT", 185, 400);
+        g.drawRect((int)submitButton.getX(), (int)submitButton.getY(), (int)submitButton.getWidth(), (int)submitButton.getHeight());
         g.drawRect((int)button.getX(), (int)button.getY(), (int)button.getWidth(), (int)button.getHeight());
     }
 
@@ -54,23 +60,33 @@ class DrawPanel extends JPanel implements MouseListener {
                 hand = Card.buildHand(deck);
             }
 
-            for (int i = 0; i < hand.size(); i++) {
-                Rectangle box = hand.get(i).getCardBox();
-                if (box.contains(clicked)) {
-                    hand.get(i).flipCard();
+            if (Card.hasPossibleMoves(hand)) {
+                if (submitButton.contains(clicked)) {
+                    ArrayList<Integer> index = Card.submit(hand);
+                    if(index.size() != 0 && deck.size() != 0) {
+                        for (int i = 0; i < index.size(); i ++) {
+                            Card card = Card.getCard(deck);
+                            hand.set(index.get(i), card);
+                        }
+                    }
+                }
+
+                for (int i = 0; i < hand.size(); i++) {
+                    Rectangle box = hand.get(i).getCardBox();
+                    if (box.contains(clicked)) {
+                        hand.get(i).flipCard();
+                    }
                 }
             }
         }
 
         if (e.getButton() == 3) {
-            for (int i = 0; i < hand.size(); i++) {
-                Rectangle box = hand.get(i).getCardBox();
-                if (box.contains(clicked) && hand.get(i).getHighlight() && deck.size() != 0) {
-                    Card card = Card.getCard(deck);
-                    hand.set(i, card);
-                }
-                else if (box.contains(clicked)) {
-                    hand.get(i).flipHighlight();
+            if (Card.hasPossibleMoves(hand)) {
+                for (int i = 0; i < hand.size(); i++) {
+                    Rectangle box = hand.get(i).getCardBox();
+                    if (box.contains(clicked) && getTotalHighlightedCards(hand) != 3) {
+                        hand.get(i).flipHighlight();
+                    }
                 }
             }
         }
@@ -82,4 +98,15 @@ class DrawPanel extends JPanel implements MouseListener {
     public void mouseEntered(MouseEvent e) { }
     public void mouseExited(MouseEvent e) { }
     public void mouseClicked(MouseEvent e) { }
+
+    public int getTotalHighlightedCards(ArrayList<Card> hand) {
+        int sum = 0;
+        for (Card card: hand) {
+            if (card.getHighlight()) {
+                sum ++;
+            }
+        }
+        return sum;
+    }
+
 }
