@@ -87,6 +87,9 @@ class DrawPanel extends JPanel implements MouseListener {
                     if (box.contains(clicked) && getTotalHighlightedCards(hand) != 3) {
                         hand.get(i).flipHighlight();
                     }
+                    else if (box.contains(clicked) && hand.get(i).getHighlight()) {
+                        hand.get(i).flipHighlight();
+                    }
                 }
             }
         }
