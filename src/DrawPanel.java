@@ -1,11 +1,8 @@
+import java.awt.*;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
 import javax.swing.JPanel;
-import java.awt.Graphics;
-import java.awt.Rectangle;
-import java.awt.Point;
 import java.util.ArrayList;
-import java.awt.Font;
 
 class DrawPanel extends JPanel implements MouseListener {
 
@@ -14,6 +11,8 @@ class DrawPanel extends JPanel implements MouseListener {
     private ArrayList<Card> deck;
     private Rectangle button;
     private Rectangle submitButton;
+    private boolean gameOver = false;
+    private int countOnce;
 
     public DrawPanel() {
         button = new Rectangle(147, 300, 160, 26);
@@ -29,6 +28,9 @@ class DrawPanel extends JPanel implements MouseListener {
         int card = 0;
         int x = 105;
         int y = 10;
+        if (!Card.hasPossibleMoves(hand)) {
+            gameOver = true;
+        }
         for (int i = 0; i < hand.size()/3; i++) {
             for (int col = 0; col < 3; col++) {
                 Card c = hand.get(card);
@@ -44,10 +46,20 @@ class DrawPanel extends JPanel implements MouseListener {
             x = 105;
         }
         g.setFont(new Font("Courier New", Font.BOLD, 20));
-        g.drawString("GET NEW CARDS", 150, 320);
-        g.drawString("SUBMIT", 185, 400);
-        g.drawRect((int)submitButton.getX(), (int)submitButton.getY(), (int)submitButton.getWidth(), (int)submitButton.getHeight());
-        g.drawRect((int)button.getX(), (int)button.getY(), (int)button.getWidth(), (int)button.getHeight());
+        if (!gameOver) {
+            g.drawString("GET NEW CARDS", 150, 320);
+            g.drawString("SUBMIT", 185, 400);
+            g.drawString(STR."CARDS LEFT: \{deck.size()}", 0, 450);
+            g.drawRect((int)submitButton.getX(), (int)submitButton.getY(), (int)submitButton.getWidth(), (int)submitButton.getHeight());
+            g.drawRect((int)button.getX(), (int)button.getY(), (int)button.getWidth(), (int)button.getHeight());
+        }
+        else {
+            if (countOnce == 0) {
+                g.fillRect(0, 0, getWidth(), getHeight());
+                countOnce++;
+            }
+            g.drawString("GAME OVER", 190, 200);
+        }
     }
 
     public void mousePressed(MouseEvent e) {
@@ -59,7 +71,12 @@ class DrawPanel extends JPanel implements MouseListener {
                 deck = Card.buildDeck();
                 hand = Card.buildHand(deck);
             }
-
+            if (gameOver) {
+                countOnce = 0;
+                deck = Card.buildDeck();
+                hand = Card.buildHand(deck);
+                gameOver = false;
+            }
             if (Card.hasPossibleMoves(hand)) {
                 if (submitButton.contains(clicked)) {
                     ArrayList<Integer> index = Card.submit(hand);
