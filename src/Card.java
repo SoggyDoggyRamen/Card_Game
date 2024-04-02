@@ -153,10 +153,19 @@ public class Card {
     }
     public static ArrayList<Card> buildHand(ArrayList<Card> deck) {
         ArrayList<Card> hand = new ArrayList<Card>();
-        for (int i = 0; i < 9; i++) {
-            int r = (int)(Math.random()*deck.size());
-            Card c = deck.remove(r);
-            hand.add(c);
+        if (deck.size() < 9) {
+            for (int i = 0; i < deck.size(); i++) {
+                int r = (int)(Math.random()*deck.size());
+                Card c = deck.remove(r);
+                hand.add(c);
+            }
+        }
+        else {
+            for (int i = 0; i < 9; i++) {
+                int r = (int)(Math.random()*deck.size());
+                Card c = deck.remove(r);
+                hand.add(c);
+            }
         }
         return hand;
     }

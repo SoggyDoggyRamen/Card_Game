@@ -11,16 +11,17 @@ class DrawPanel extends JPanel implements MouseListener {
     private ArrayList<Card> deck;
     private Rectangle button;
     private Rectangle submitButton;
-    private boolean gameOver = false;
+    private boolean lose = false;
+    private boolean win = false;
     private int countOnce;
 
     public DrawPanel() {
         button = new Rectangle(147, 300, 160, 26);
         submitButton = new Rectangle(180, 380, 90, 26);
         deck = Card.buildDeck();
+        hand = Card.buildHand(deck);
         running = true;
         this.addMouseListener(this);
-        hand = Card.buildHand(deck);
     }
 
     protected void paintComponent(Graphics g) {
@@ -28,37 +29,71 @@ class DrawPanel extends JPanel implements MouseListener {
         int card = 0;
         int x = 105;
         int y = 10;
+        //check if u lost
         if (!Card.hasPossibleMoves(hand)) {
-            gameOver = true;
+            lose = true;
         }
-        for (int i = 0; i < hand.size()/3; i++) {
-            for (int col = 0; col < 3; col++) {
-                Card c = hand.get(card);
-                if (c.getHighlight()) {
-                    g.drawRect(x, y, c.getImage().getWidth(), c.getImage().getHeight());
-                }
-                c.setRectangleLocation(x, y);
-                g.drawImage(c.getImage(), x, y, null);
-                x = x + c.getImage().getWidth() + 25;
-                card ++;
-            }
-            y = y + 100;
-            x = 105;
+        //check if u won
+        if (deck.size() + hand.size() == 0) {
+            win = true;
         }
         g.setFont(new Font("Courier New", Font.BOLD, 20));
-        if (!gameOver) {
+
+        //Main game
+        if (!lose && !win) {
+            int cols = 0;
+            int rows = 0;
+            if (!(hand.size() % 3 == 0)) {
+                rows = hand.size()/3 + 1;
+            }
+            else {
+                rows = hand.size()/3;
+            }
+            //draws the hand out
+            for (int row = 0; row < rows; row ++) {
+                if (row + 1 == rows && hand.size() % 3 != 0) {
+                    cols = hand.size() % 3;
+                }
+                else {
+                    cols = 3;
+                }
+                for (int col = 0; col < cols; col++) {
+                    Card c = hand.get(card);
+                    if (c.getHighlight()) {
+                        g.drawRect(x, y, c.getImage().getWidth(), c.getImage().getHeight());
+                    }
+                    c.setRectangleLocation(x, y);
+                    g.drawImage(c.getImage(), x, y, null);
+                    x = x + c.getImage().getWidth() + 25;
+                    card ++;
+                }
+                y = y + 100;
+                x = 105;
+            }
+
+            //draws buttons
             g.drawString("GET NEW CARDS", 150, 320);
             g.drawString("SUBMIT", 185, 400);
-            g.drawString(STR."CARDS LEFT: \{deck.size()}", 0, 450);
+            g.drawString("CARDS LEFT: " + deck.size(), 0, 450);
             g.drawRect((int)submitButton.getX(), (int)submitButton.getY(), (int)submitButton.getWidth(), (int)submitButton.getHeight());
             g.drawRect((int)button.getX(), (int)button.getY(), (int)button.getWidth(), (int)button.getHeight());
         }
-        else {
+        //lose screen
+        else if (lose){
             if (countOnce == 0) {
                 g.fillRect(0, 0, getWidth(), getHeight());
                 countOnce++;
             }
             g.drawString("GAME OVER", 190, 200);
+        }
+
+        //win screen
+        else if (win) {
+            if (countOnce == 0) {
+                g.fillRect(0, 0, getWidth(), getHeight());
+                countOnce++;
+            }
+            g.drawString("YOU WON!", 190, 200);
         }
     }
 
@@ -71,11 +106,12 @@ class DrawPanel extends JPanel implements MouseListener {
                 deck = Card.buildDeck();
                 hand = Card.buildHand(deck);
             }
-            if (gameOver) {
+            if (lose || win) {
                 countOnce = 0;
                 deck = Card.buildDeck();
                 hand = Card.buildHand(deck);
-                gameOver = false;
+                lose = false;
+                win = false;
             }
             if (Card.hasPossibleMoves(hand)) {
                 if (submitButton.contains(clicked)) {
